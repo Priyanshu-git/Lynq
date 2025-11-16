@@ -3,6 +3,7 @@ plugins {
     alias(libs.plugins.jetbrains.kotlin.android)
     alias(libs.plugins.ksp)
     alias(libs.plugins.compose.compiler)
+    alias(libs.plugins.dagger)
 }
 
 android {
@@ -17,10 +18,15 @@ android {
         versionName "1.0"
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+
+        // Default values (used when not overridden by buildType / flavor)
+        buildConfigField "String", "BASE_URL", "\"https://api.yourdomain.com/\""
+        buildConfigField "Boolean", "ENABLE_LOGGING", "true"
     }
 
     buildFeatures{
         compose true
+        buildConfig true
     }
 
     composeOptions {
@@ -30,8 +36,19 @@ android {
 
     buildTypes {
         release {
-            minifyEnabled false
+            buildConfigField "String", "BASE_URL", "\"${project.property('API_BASE_URL')}\""
+            buildConfigField "Boolean", "ENABLE_LOGGING", "false"
+
+            minifyEnabled true
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+        }
+        debug {
+            // dev/staging url
+            buildConfigField "String", "BASE_URL", "\"${project.property('API_BASE_URL')}\""
+            buildConfigField "Boolean", "ENABLE_LOGGING", "true"
+            applicationIdSuffix ".debug"
+
+            minifyEnabled false
         }
     }
     compileOptions {
@@ -66,6 +83,9 @@ dependencies {
     implementation libs.androidx.room.runtime
     implementation libs.androidx.room.ktx
     ksp libs.androidx.room.compiler
+
+    implementation libs.hilt.android
+    ksp libs.hilt.compiler
 
     testImplementation libs.junit
     androidTestImplementation libs.androidx.junit
