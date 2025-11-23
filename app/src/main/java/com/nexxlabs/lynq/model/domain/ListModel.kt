@@ -7,7 +7,7 @@ data class ListModel(
     val type: String, // e.g. "grocery" | "general"
     val createdBy: String,
     val groupId: String? = null, // null for personal lists
-    val createdAt: String,
-    val updatedAt: String,
+    val createdAt: String?,
+    val updatedAt: String?,
     val pendingCount: Int = 0 // UI helper
 )

@@ -1,7 +1,9 @@
 package com.nexxlabs.lynq.ui.dashboard
 
 
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -15,73 +17,89 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Badge
 import androidx.compose.material3.Card
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import coil.compose.rememberAsyncImagePainter
-import coil.request.ImageRequest
 import com.nexxlabs.lynq.model.domain.ListModel
+import com.nexxlabs.lynq.util.getAccentCategoryColor
+import com.nexxlabs.lynq.util.getCategoryFromLabel
+import com.nexxlabs.lynq.util.getIconByCategory
+import com.nexxlabs.lynq.util.getPrimaryCategoryColor
 
-// Use the uploaded file as sample image URL (file:///...).
-private const val SAMPLE_IMAGE_URL = "file:///mnt/data/8e8afd3f-4e25-4ea3-ab94-9bb98e62f525.jpg"
+private val temp = ListModel(
+    "list_weekly_groceries",
+    "Weekly Groceries",
+    "Shopping for this week",
+    "shopping",
+    "user_a",
+    "group_1",
+    null,
+    null,
+    pendingCount = 3
+)
 
+@Preview
 @Composable
-fun ListCard(item: ListModel, onClick: () -> Unit = {}) {
+fun ListCard(item: ListModel = temp, onClick: () -> Unit = {}) {
+    val listCategory = getCategoryFromLabel(item.type)
     Card(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(vertical = 6.dp)
+            .shadow(2.dp, RoundedCornerShape(4.dp), clip = false)
             .clickable { onClick() },
-        shape = RoundedCornerShape(12.dp),
-//        elevation = CardElevation()
+        shape = RoundedCornerShape(4.dp),
     ) {
-        Row(modifier = Modifier
-            .padding(12.dp)
-            .fillMaxWidth(),
+        Row(
+            modifier = Modifier
+                .background(color = MaterialTheme.colorScheme.background)
+                .padding(12.dp)
+                .fillMaxWidth(),
             verticalAlignment = Alignment.CenterVertically
         ) {
 
-            // Left accent bar
-            val accentColor = when (item.type) {
-                "grocery" -> Color(0xFF8EB69B)
-                "general" -> Color(0xFF235347)
-                else -> Color(0xFF163832)
-            }
-            Box(
-                modifier = Modifier
-                    .size(width = 6.dp, height = 64.dp)
-                    .clip(RoundedCornerShape(6.dp))
-                    .background(accentColor)
-            )
-
             Spacer(modifier = Modifier.width(12.dp))
 
-            // Image (using Coil to load file:// path)
-            val painter = rememberAsyncImagePainter(
-                ImageRequest.Builder(LocalContext.current)
-                    .data(SAMPLE_IMAGE_URL)
-                    .crossfade(true)
-                    .build()
-            )
-            androidx.compose.foundation.Image(
-                painter = painter,
-                contentDescription = "list image",
-                modifier = Modifier.size(48.dp)
-            )
+            // Image
+            Box(
+                modifier = Modifier
+                    .background(
+                        getAccentCategoryColor(listCategory),
+                        shape = RoundedCornerShape(100)
+                    )
+                    .size(48.dp)
+                    .border(
+                        width = 1.dp,
+                        color = getPrimaryCategoryColor(listCategory),
+                        shape = RoundedCornerShape(100)
+                    )
+                    .padding(14.dp)
+            ) {
+                Image(
+                    painter = painterResource(id = getIconByCategory(listCategory)),
+                    contentDescription = "list image",
+                    modifier = Modifier.size(48.dp)
+                )
+            }
 
             Spacer(modifier = Modifier.width(12.dp))
 
             Column(modifier = Modifier.weight(1f)) {
                 Text(item.title, fontWeight = FontWeight.Bold, fontSize = 16.sp)
                 Spacer(modifier = Modifier.height(4.dp))
-                Text(item.description ?: "Last updated just now", fontSize = 12.sp, color = Color.Gray)
+                Text(
+                    item.description ?: "Last updated just now",
+                    fontSize = 12.sp,
+                    color = Color.Gray
+                )
             }
 
             // pending count bubble
